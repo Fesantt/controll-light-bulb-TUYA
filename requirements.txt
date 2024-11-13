@@ -1,0 +1,5 @@
+tinytuya
+tkinter
+pystray
+pillow
+pylint
