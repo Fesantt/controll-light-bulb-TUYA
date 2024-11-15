@@ -4,7 +4,7 @@ from tkinter import colorchooser
 from tkinter import PhotoImage
 
 device_id = "eb75f9e1125087dd17vxvn"  # Device ID
-local_key = "l(tO5ba0$t?(VtB2"  # Local Key
+local_key = "SUA_LOCAL_KEY"  # Local Key
 device_ip = "192.168.1.3"  # IP do dispositivo
 version = 3.3  # Versão do protocolo
 
