@@ -132,6 +132,7 @@ status_label = tk.Label(janela, text="Status: Aguardando comando", **status_styl
 status_label.pack(pady=20)
 
 title_bar.bind("<Button-1>", iniciar_arrasto)
+
 title_bar.bind("<B1-Motion>", arrastar)
 
 janela.mainloop()
