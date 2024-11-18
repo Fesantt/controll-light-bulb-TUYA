@@ -1,0 +1,2 @@
+rede: lampada_quarto
+senha: 12345678
