@@ -5,18 +5,44 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-
-ipLamp = "192.168.1.4" # IP do dispositivo
+# IP do dispositivo
+ipLamp = "192.168.1.4"
 
 # Endereços dos endpoints
 endereco_base = f"http://{ipLamp}/light/light/turn_on"
 endereco_desligar = f"http://{ipLamp}/light/light/turn_off"
+api_clima = "https://api.weatherapi.com/v1/current.json?q=-11.013325%2C-68.743987&lang=pt&key={SUA_API_KEY_AKI}" #DEFINA SUA API KEY LATITUDE E LONGITUDE
+
+def get_clima():
+    try:
+        response = requests.get(f"{api_clima}")
+        if response.ok:
+            return response.json()
+        else:
+            return None
+    except Exception as e:
+        print(f"Erro ao obter clima 🥲")
+        return None
+
+def atualizar_clima():
+    
+    clima = get_clima()
+    if clima:
+        condition = clima["current"]["condition"]["text"]
+        temp = clima["current"]["temp_c"]
+        clima_label.config(text=f"Clima: {condition}", fg="lightblue")
+        temp_label.config(text=f"Temperatura: {temp}°C", fg="lightblue")
+    else:
+        clima_label.config(text="Erro ao obter clima", fg="red")
+        temp_label.config(text="Erro ao obter clima", fg="red")
+
+    janela.after(3600000, atualizar_clima)
 
 def ligar():
     try:
         response = requests.get(f"{endereco_base}?brightness=1000")
         if response.ok:
-            status_label.config(text="Status: Lâmpada ligada", fg="#00ff99")
+            status_label.config(text="Status: Lâmpada ligada 💡", fg="#00ff99")
         else:
             status_label.config(text="Erro ao ligar a lâmpada", fg="red")
     except Exception as e:
@@ -26,7 +52,7 @@ def desligar():
     try:
         response = requests.get(endereco_desligar)
         if response.ok:
-            status_label.config(text="Status: Lâmpada desligada", fg="#ff3333")
+            status_label.config(text="Status: Lâmpada desligada 🌑", fg="#ff3333")
         else:
             status_label.config(text="Erro ao desligar a lâmpada", fg="red")
     except Exception as e:
@@ -44,7 +70,6 @@ def escolher_cor():
                 status_label.config(text="Erro ao definir cor", fg="red")
     except Exception as e:
         status_label.config(text=f"Erro ao definir cor: {e}", fg="red")
-
 
 def ajustar_brilho(valor):
     try:
@@ -98,8 +123,8 @@ def arrastar(event):
 
 # Configuração da interface Tkinter
 janela = tk.Tk()
-janela.title("Lâmpada Santt")
-janela.geometry("300x420+100+100")
+janela.title("💡Lâmpada Santt")
+janela.geometry("300x380+100+100")
 janela.configure(bg="#2c2f33")
 janela.overrideredirect(True)
 
@@ -120,7 +145,7 @@ button_style = {
     "bg": "#5865f2",
     "fg": "white",
     "relief": "flat",
-    "width": 20,
+    "width": 10, 
     "height": 1,
     "bd": 0,
     "activebackground": "#4752c4",
@@ -134,37 +159,52 @@ status_style = {
     "bg": "#2c2f33"
 }
 
-ligar_btn = tk.Button(janela, text="Ligar", command=ligar, **button_style)
-ligar_btn.pack(pady=10)
+botoes_frame = tk.Frame(janela, bg="#2c2f33")
+botoes_frame.pack(pady=10)
 
-desligar_btn = tk.Button(janela, text="Desligar", command=desligar, **button_style)
+ligar_btn = tk.Button(botoes_frame, text="Ligar", command=ligar, **button_style)
+ligar_btn.pack(side="left", padx=(0, 1))
+
+desligar_btn = tk.Button(botoes_frame, text="Desligar", command=desligar, **button_style)
 desligar_btn.config(bg="#ff3333", activebackground="#ff5e5e")
-desligar_btn.pack(pady=10)
+desligar_btn.pack(side="left", padx=(1, 0))
+
 
 cor_btn = tk.Button(janela, text="Escolher Cor", command=escolher_cor, **button_style)
 cor_btn.config(bg="#42a5f5", activebackground="#64b5f6")
 cor_btn.pack(pady=10)
 
-brilho_label = tk.Label(janela, text="Ajustar Brilho (0 a 100)", **status_style)
-brilho_label.pack(pady=(20, 5))
+brilho_label = tk.Label(janela, text="Ajustar Brilho (1 a 100)", **status_style)
+brilho_label.pack(pady=(0))
 
-brilho_scale = tk.Scale(janela, from_=0, to=100, orient="horizontal", length=300, command=ajustar_brilho,
-                        fg="white", bg="#2c2f33", troughcolor="#5865f2", sliderrelief="flat", highlightbackground="#2c2f33",
-                        activebackground="#5865f2", sliderlength=20, bd=0)
+brilho_scale = tk.Scale(
+    janela, from_=1, to=100, orient="horizontal", length=300, command=ajustar_brilho,
+    fg="white", bg="#2c2f33", troughcolor="#5865f2", sliderrelief="flat",
+    highlightbackground="#2c2f33", activebackground="#5865f2", sliderlength=20, bd=0
+)
 brilho_scale.set(100)
 brilho_scale.pack(pady=5)
 
-temp_label = tk.Label(janela, text="Temperatura de Cor (0 a 100)", **status_style)
-temp_label.pack(pady=(20, 5))
 
-temp_scale = tk.Scale(janela, from_=0, to=100, orient="horizontal", length=300, command=ajustar_temperatura,
+temp_label = tk.Label(janela, text="Temperatura de Cor (1 a 100)", **status_style)
+temp_label.pack(pady=(5, 5))
+
+temp_scale = tk.Scale(janela, from_=1, to=100, orient="horizontal", length=300, command=ajustar_temperatura,
                       fg="white", bg="#2c2f33", troughcolor="#ffb74d", sliderrelief="flat", highlightbackground="#2c2f33",
                       activebackground="#ffb74d", sliderlength=20, bd=0)
-temp_scale.set(50)
+temp_scale.set(1)
 temp_scale.pack(pady=5)
 
 status_label = tk.Label(janela, text="Status: Aguardando comando", **status_style)
-status_label.pack(pady=20)
+status_label.pack(pady=6)
+
+clima_label = tk.Label(janela, text="Clima: Aguardando...", **status_style)
+clima_label.pack(pady=(5, 5))
+
+temp_label = tk.Label(janela, text="Temperatura: Aguardando...", **status_style)
+temp_label.pack(pady=(5, 6))
+
+atualizar_clima()
 
 title_bar.bind("<Button-1>", iniciar_arrasto)
 title_bar.bind("<B1-Motion>", arrastar)
